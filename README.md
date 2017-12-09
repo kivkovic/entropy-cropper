@@ -8,5 +8,6 @@ A PHP script for smart image cropping. Uses entropy analysis to find the area of
 php cropper.php -w [width] -h [height] [-q [quality]] -i [input path] -o [output path]
 ```
 
+## Requirements
 
-Requires php-gd
+Requires PHP and php-gd
