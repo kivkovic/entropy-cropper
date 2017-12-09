@@ -185,3 +185,46 @@ function rgb_to_hsv($r, $g, $b) {
 function logg($line = "") {
     echo "[" . microtime(TRUE) . "] ".$line."\n";
 }
+
+
+/**
+ * CLI
+ */
+if ($argv && count($argv)) {
+    $options = getopt('w:h:q:i:o:');
+
+    $width = $options['w'];
+    if (!is_numeric($width) || $width <= 0) {
+        throw new Exception("Invalid crop width: \"${$options['w']}\"\n-w [INTEGER]");
+    }
+
+    $height = $options['h'];
+    if (!is_numeric($height) || $height <= 0) {
+        throw new Exception("Invalid crop height: \"${$options['h']}\"\n-h [INTEGER]");
+    }
+    
+    $quality = isset($options['q']) ? $options['q'] : 90;
+    if (!is_numeric($quality) || $quality <= 1) {
+        throw new Exception("Invalid crop height: \"${$options['q']}\"\n-q [0-9]");
+    }
+
+    $source = $options['i'];
+    $destination = $options['o'];
+
+    if (empty($source)) {
+        throw new Exception("Invalid source path: \"${$options['i']}\"\n-i [FILE]");
+    }
+
+    if (empty($destination)) {
+        throw new Exception("Invalid destination path: \"${$options['o']}\"\n-o [FILE]");
+    }
+
+    $start = microtime(TRUE);
+    logg("Cropping: $source");
+
+    $cropped = crop($source, $width, $height);
+    imagejpeg($cropped, $destination, $quality);
+    
+    logg("Saved to: $destination");
+    logg("Total duration: " . round(microtime(TRUE) - $start, 3) . "s\n");
+}
