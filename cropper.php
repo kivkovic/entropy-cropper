@@ -191,32 +191,48 @@ function logg($line = "") {
  * CLI
  */
 if ($argv && count($argv)) {
+
+    error_reporting(0);
+
+    set_error_handler(function ($severity, $message, $filename, $lineno) {
+        //fwrite(STDERR, "[" . microtime(TRUE) . "] [ERROR] ".$message."\n");
+    });
+
+    register_shutdown_function(function () {
+        $error = error_get_last();
+        if (!empty($error['message'])) {
+            fwrite(STDERR, "[" . microtime(TRUE) . "] [ERROR] ".$error['message']."\n");
+        }
+    });
+
+    $USAGE = "\n\nentropy-cropper v0.0.9\n\nUsage:\nphp cropper.php -w [width] -h [height] [-q [quality]] -i [input path] -o [output path]\n\n";
+
     $options = getopt('w:h:q:i:o:');
 
-    $width = $options['w'];
+    $width = isset($options['w']) ? (integer) $options['w'] : null;
     if (!is_numeric($width) || $width <= 0) {
-        throw new Exception("Invalid crop width: \"${$options['w']}\"\n-w [INTEGER]");
+        throw new Exception("Invalid crop width: \"$width\"$USAGE");
     }
 
-    $height = $options['h'];
+    $height = isset($options['h']) ? (integer) $options['h'] : null;
     if (!is_numeric($height) || $height <= 0) {
-        throw new Exception("Invalid crop height: \"${$options['h']}\"\n-h [INTEGER]");
+        throw new Exception("Invalid crop height: \"height\"$USAGE");
     }
     
     $quality = isset($options['q']) ? $options['q'] : 90;
     if (!is_numeric($quality) || $quality <= 1) {
-        throw new Exception("Invalid crop height: \"${$options['q']}\"\n-q [0-9]");
+        throw new Exception("Invalid crop height: \"$quality\"$USAGE");
     }
 
-    $source = $options['i'];
-    $destination = $options['o'];
+    $source = isset($options['i']) ? $options['i'] : null;
+    $destination = isset($options['o']) ? $options['o'] : null;
 
-    if (empty($source)) {
-        throw new Exception("Invalid source path: \"${$options['i']}\"\n-i [FILE]");
+    if (empty($source) || !file_exists($source)) {
+        throw new Exception("Invalid source path: \"$source\"$USAGE");
     }
 
-    if (empty($destination)) {
-        throw new Exception("Invalid destination path: \"${$options['o']}\"\n-o [FILE]");
+    if (empty($destination) || !is_writable($destination)) {
+        throw new Exception("Invalid destination path: \"$destination\"$USAGE");
     }
 
     $start = microtime(TRUE);
