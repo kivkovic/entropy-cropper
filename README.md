@@ -10,4 +10,5 @@ php cropper.php -w [width] -h [height] [-q [quality]] -i [input path] -o [output
 
 ## Requirements
 
-Requires PHP and php-gd
+- php >= 5.3
+- php-gd
