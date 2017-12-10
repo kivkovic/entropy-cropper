@@ -44,7 +44,12 @@ function crop($source, $crop_width, $crop_height) {
 
     $cropped = imagecrop(
         $image,
-        ['x' => $target_x / $factor, 'y' => $target_y / $factor, 'width' => $crop_width, 'height' => $crop_height]
+        array(
+            'x' => $target_x / $factor,
+            'y' => $target_y / $factor,
+            'width' => $crop_width,
+            'height' => $crop_height
+        )
     );
 
     logg("Memory usage: " . memory_get_peak_usage(true)/1024/1024 . " MB");
@@ -82,7 +87,7 @@ function max_entropy_segment($colors, $width, $height, $crop_width, $crop_height
 
     for ($x = 0; $x < $width - $crop_width; $x += $step_x) {
         for ($y = 0; $y < $height - $crop_height; $y += $step_y) {
-            
+
             $current_entropy = entropy($colors, $x, $y, $crop_width, $crop_height, 1, 1, 1);
 
             if ($current_entropy > $max_entropy) {
@@ -93,15 +98,15 @@ function max_entropy_segment($colors, $width, $height, $crop_width, $crop_height
         }
     }
 
-    return [$max_x, $max_y, $max_entropy];
+    return array($max_x, $max_y, $max_entropy);
 }
 
 function colors($image, $width, $height) {
 
-    $rgb = [];
+    $rgb = array();
 
     for ($x = 0; $x < $width; $x++) {
-        $rgb[$x] = [];
+        $rgb[$x] = array();
 
         for ($y = 0; $y < $height; $y++) {
             $value = imagecolorat($image, $x, $y);
