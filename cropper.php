@@ -19,26 +19,29 @@ function crop($source, $crop_width, $crop_height) {
         $new_width  = round($width * $factor);
         $new_height = round($height * $factor);
 
-        $clone1 = copy_resized($image, $new_width, $new_height);
+        $clone = copy_resized($image, $new_width, $new_height);
         logg("Working copy resized to: {$new_width} x {$new_height}");
 
     } else {
-        $clone1     = imagecreatefromjpeg($source);
+        $clone      = imagecreatefromjpeg($source);
         $new_height = $height;
         $new_width  = $width;
     }
 
-    for ($i = 0; $i < 8; $i++) {
-        imagefilter($clone1, IMG_FILTER_GAUSSIAN_BLUR);
-    }
+    simple_blur($clone, 8);
 
-    $colors = colors($clone1, $new_width, $new_height);
+    imagefilter($clone, IMG_FILTER_EDGEDETECT);
+
+    imagefilter($clone, IMG_FILTER_CONTRAST, -100);
+    simple_blur($clone, 36);
+
+    $colors = colors($clone, $new_width, $new_height);
     $step_x = max(1, floor(($new_width - $crop_width * $factor) / 3));
     $step_y = max(1, floor(($new_height - $crop_height * $factor) / 3));
     logg("Step: $step_x / $step_y");
 
     list($target_x, $target_y) = max_entropy_segment($colors, $new_width, $new_height, $crop_width * $factor, $crop_height * $factor, $step_x, $step_y);
-    
+
     $cropped = imagecrop(
         $image,
         ['x' => $target_x / $factor, 'y' => $target_y / $factor, 'width' => $crop_width, 'height' => $crop_height]
@@ -49,13 +52,25 @@ function crop($source, $crop_width, $crop_height) {
     return $cropped;
 }
 
+function simple_blur($image, $repeat = 1) {
+    for ($i = 0; $i < $repeat; $i++) {
+        imageconvolution($image,
+            array(
+                array(1.0, 1.0, 1.0),
+                array(1.0, 1.0, 1.0),
+                array(1.0, 1.0, 1.0)
+            ), 8.975, 0
+        );
+    }
+}
+
 function copy_resized($image, $new_width, $new_height) {
-    
+
     $width  = imagesx($image);
     $height = imagesy($image);
     $clone  = imagecreatetruecolor($new_width, $new_height);
     imagecopyresampled($clone, $image, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
-    
+
     return $clone;
 }
 
@@ -77,7 +92,7 @@ function max_entropy_segment($colors, $width, $height, $crop_width, $crop_height
             }
         }
     }
-    
+
     return [$max_x, $max_y, $max_entropy];
 }
 
@@ -100,7 +115,7 @@ function colors($image, $width, $height) {
 function entropy($colors, $x_offset, $y_offset, $crop_width, $crop_height, $normalize_r = 1, $normalize_g = 1, $normalize_b = 1) {
 
     $levels_rgb  = array_fill(0, 768, 0);
-   
+
     for ($x = 0; $x < $crop_width; $x++) {
         for ($y = 0; $y < $crop_height; $y++) {
 
@@ -173,7 +188,7 @@ if ($argv && count($argv)) {
     if (!is_numeric($height) || $height <= 0) {
         throw new Exception("Invalid crop height: \"height\"$USAGE");
     }
-    
+
     $quality = isset($options['q']) ? $options['q'] : 90;
     if (!is_numeric($quality) || $quality <= 1) {
         throw new Exception("Invalid crop height: \"$quality\"$USAGE");
@@ -195,7 +210,7 @@ if ($argv && count($argv)) {
 
     $cropped = crop($source, $width, $height);
     imagejpeg($cropped, $destination, $quality);
-    
+
     logg("Saved to: $destination");
     logg("Total duration: " . round(microtime(TRUE) - $start, 3) . "s\n");
 }
