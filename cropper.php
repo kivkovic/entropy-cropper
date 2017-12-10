@@ -37,8 +37,6 @@ function crop($source, $crop_width, $crop_height) {
     $step_y = max(1, floor(($new_height - $crop_height * $factor) / 3));
     logg("Step: $step_x / $step_y");
 
-    $entropy = entropy_grid($colors, 20, 20);
-
     list($target_x, $target_y) = max_entropy_segment($colors, $new_width, $new_height, $crop_width * $factor, $crop_height * $factor, $step_x, $step_y);
     
     $cropped = imagecrop(
@@ -60,22 +58,6 @@ function copy_resized($image, $new_width, $new_height) {
     
     return $clone;
 }
-
-function entropy_grid($colors, $step_x, $step_y) {
-    $entropy = [];
-
-    for ($x = 0; $x + $step_x < count($colors); $x += $step_x) {
-        $entropy[$x] = [];
-
-        for ($y = 0; $y + $step_y < count($colors[$x]); $y += $step_y) {
-            $current_entropy = entropy($colors, $x, $y, $step_x, $step_y);
-            $entropy []= $current_entropy;
-        }
-    }
-
-    return $entropy;
-}
-
 
 function max_entropy_segment($colors, $width, $height, $crop_width, $crop_height, $step_x, $step_y) {
 
