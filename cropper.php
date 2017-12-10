@@ -139,31 +139,6 @@ function levels_to_entropy($levels) {
     return -$entropy;
 }
 
-function rgb_to_hsv($r, $g, $b) {
-    
-    $r /= 255;
-    $g /= 255;
-    $b /= 255;
- 
-    $maxrgb = max($r, $g, $b);
-    $minrgb = min($r, $g, $b);
-    $chroma = $maxrgb - $minrgb;
- 
-    if ($chroma == 0) {
-        return [0, 0, 100 * $maxrgb];
-    }
- 
-    if ($minrgb == $r) {
-        $h = 3 - (($g - $b) / $chroma);
-    } else if ($minrgb == $b) {
-        $h = 1 - (($r - $g) / $chroma);
-    } else {
-        $h = 5 - (($b - $r) / $chroma);
-     }
- 
-    return [60 * $h, 100 * ($chroma / $maxrgb), 100 * $maxrgb];
-}
-
 function logg($line = "") {
     echo "[" . microtime(TRUE) . "] ".$line."\n";
 }
