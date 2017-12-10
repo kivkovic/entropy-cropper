@@ -194,16 +194,14 @@ if ($argv && count($argv)) {
 
     error_reporting(0);
 
-    set_error_handler(function ($severity, $message, $filename, $lineno) {
-        //fwrite(STDERR, "[" . microtime(TRUE) . "] [ERROR] ".$message."\n");
-    });
-
-    register_shutdown_function(function () {
+    function shutdown_function() {
         $error = error_get_last();
         if (!empty($error['message'])) {
             fwrite(STDERR, "[" . microtime(TRUE) . "] [ERROR] ".$error['message']."\n");
         }
-    });
+    };
+
+    register_shutdown_function('shutdown_function');
 
     $USAGE = "\n\nentropy-cropper v0.0.9\n\nUsage:\nphp cropper.php -w [width] -h [height] [-q [quality]] -i [input path] -o [output path]\n\n";
 
