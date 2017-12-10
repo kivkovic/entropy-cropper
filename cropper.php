@@ -229,7 +229,7 @@ if ($argv && count($argv)) {
         throw new Exception("Invalid source path: \"$source\"$USAGE");
     }
 
-    if (empty($destination) || !is_writable($destination)) {
+    if (empty($destination) || !is_writable(dirname($destination))) {
         throw new Exception("Invalid destination path: \"$destination\"$USAGE");
     }
 
